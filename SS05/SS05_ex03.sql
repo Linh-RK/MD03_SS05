@@ -1,3 +1,31 @@
+-- Tạo store procedure lấy ra tất cả lớp học có số lượng học sinh lớn hơn 5
+create view result as
+select student.class_id, count(studentId) as total_student from student 
+GROUP BY class_id
+having total_student > 2;
+
+DELIMITER //
+CREATE PROCEDURE class_g5()
+BEGIN
+select * from class
+where class.classId in (
+select class_id from result
+);
+END //
+DELIMITER ;
+call class_g5();
+-- ---------------------
+DELIMITER //
+CREATE PROCEDURE class_g5_c1()
+BEGIN
+select class.classId,class.className, (student.class_id) as total from student
+left join class on class.classId=student.class_id
+GROUP BY class_id
+having total > 5;
+END //
+DELIMITER ;
+call class_g5_c1();
+
 -- 1.Tạo store procedure hiển thị ra danh sách môn học có điểm thi là 10
 DELIMITER //
 CREATE PROCEDURE subject_10()
@@ -16,7 +44,6 @@ call subject_10();
 delimiter //
 create procedure nameX ()
 begin
-
 select * from class
 where classId in (
 select class.classId from student 
@@ -28,6 +55,18 @@ where mark = 10
 );
 end //
 delimiter;
+-- -----------------------
+DELIMITER //
+CREATE PROCEDURE class_have_10()
+BEGIN
+select class.classId,class.className from student
+left join class on class.classId=student.class_id
+left join mark on mark.student_id=student.studentId
+where mark.mark =10;
+END //
+DELIMITER ;
+call class_have_10();
+
 
 -- 3.Tạo store procedure thêm mới student và trả ra id vừa mới thêm
 delimiter //
@@ -51,7 +90,7 @@ where subject.subjectId  not in
 END //
 DELIMITER ;
 call subject_no_mark()
--- Tạo store procedure hiển thị student chưa thi
+-- 5.Tạo store procedure hiển thị student chưa thi
 DELIMITER //
 CREATE PROCEDURE student_no_mark()
 BEGIN
